@@ -12,7 +12,7 @@
 
     .header {
       background: linear-gradient(to bottom, #337ab7 0%, #135a97 100%);
-      color: white;
+      color: #fff;
       padding: 1em 0 2em;
     }
 
@@ -95,6 +95,14 @@
   var svg;
 
   // FETCH DATA
+  d3.json('data.json', function (error, json) {
+      if (error) {throw error;}
+
+      data = json;
+
+      setup();
+      update();
+  });
 
   function setup() {
     // SVG
