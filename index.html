@@ -3,16 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Week 4: Replication Project</title>
+  <title>Poverty and Crime in the United States</title>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <link href='https://fonts.googleapis.com/css?family=Fjalla+One|Exo:400,600|Ropa+Sans' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=PT+Sans+Narrow|Arimo|Dosis|Lato' rel='stylesheet' type='text/css'>
   <style>
     .section {
       padding: 1em 0;
-    }
-    .header {
-      background: linear-gradient(to bottom, #337ab7 0%, #135a97 100%);
-      color: white;
-      padding: 1em 0 2em;
     }
     svg {
       display: block;
@@ -33,10 +30,10 @@
       stroke: rgb(51, 122, 183);
       stroke-width: 1;
       fill: rgba(51, 122, 183, .5);
-      opacity: .5;
+      opacity: .7;
     }
     .point.filtered {
-      opacity: .05;
+      opacity: .07;
     }
     .bar {
       fill: rgb(51, 122, 183);
@@ -45,19 +42,37 @@
       stroke: rgb(175, 80, 75);
       stroke-width: 2;
     }
+     body {
+      background-color: #4C4C4C;
+      font-family: 'Arimo', sans-serif;
+      color: #CECECE;
+          }
+
+    th {
+       font-family: 'Exo', sans-serif;
+        color: #FFFFFF;
+        width: 400px;
+                } 
+    h1,h3,h5,h2{
+        font-family: 'Exo', sans-serif;
+        color: #FFFFFF;
+                }   
+    #year-range {
+      color: "red";
+    }
   </style>
 </head>
 <body>
 <div class="header section">
   <div class="container">
-    <h1>Week 4: Replication Project</h1>
-    <p>Let's build a complex interactive graphic.</p>
+    <h1>Poverty and Crime</h1>
+    <p>Southeastern United States</p>
   </div>
 </div>
 <div class="controls section">
   <div class="container">
     <div class="btn-toolbar">
-      <label for="year-range">Region: </label>
+      <label for="year-range">State: </label>
       <select id="year-range">
         <option value="all">All</option>
         <option value="AL">Alabama</option>
