@@ -8,6 +8,13 @@
   <link href='https://fonts.googleapis.com/css?family=Fjalla+One|Exo:400,600|Ropa+Sans' rel='stylesheet' type='text/css'>
   <link href='https://fonts.googleapis.com/css?family=PT+Sans+Narrow|Arimo|Dosis|Lato' rel='stylesheet' type='text/css'>
   <style>
+   .axislabel {
+      fill: #FFFFFF;
+      color: #FFFFFF;
+      font-family: 'Exo', sans-serif;
+      font-size: 16px;
+      }
+    
     .section {
       padding: 1em 0;
     }
@@ -20,16 +27,17 @@
       stroke: #ccc;
       shape-rendering: crispEdges;
     }
-    .axis text {
-      font-size: 11px;
-    }
+    
     .label {
       font-weight: 700;
+
+    
+
     }
     .point {
-      stroke: rgb(51, 122, 183);
+      stroke: rgb(240, 255, 13);
       stroke-width: 1;
-      fill: rgba(51, 122, 183, .5);
+      fill: rgba(240, 255, 13, .5);
       opacity: .7;
     }
     .point.filtered {
@@ -42,7 +50,18 @@
       stroke: rgb(175, 80, 75);
       stroke-width: 2;
     }
-     body {
+    .axis text {
+        font-family: 'Arimo', sans-serif;
+        font-size: 11px;
+        fill: #CECECE;
+      }
+
+    label {
+      font-weight: 2px;
+      color: #FFFFFF;
+    }
+
+    body {
       background-color: #4C4C4C;
       font-family: 'Arimo', sans-serif;
       color: #CECECE;
@@ -58,8 +77,10 @@
         color: #FFFFFF;
                 }   
     #year-range {
-      color: "red";
-    }
+      background-color: #CECECE;
+      color: #4C4C4C;
+      border: none;
+      border-radius: 24px;
 
     .axis path,
     .axis line {
@@ -68,19 +89,22 @@
       shape-rendering: crispEdges;
                 }
 
-    .axis text {
-        font-family: 'Arimo', sans-serif;
-        font-size: 11px;
-        color: #CECECE;
+    .btn-toolbar {
+        font-weight: 2px;
+      color: #FFFFFF;
     }
+
+
+    
     
   </style>
 </head>
 <body>
 <div class="header section">
   <div class="container">
-    <h1>Poverty and Crime</h1>
-    <p>Southeastern United States</p>
+    <h1>Poverty and Crime - Southeast US</h1>
+    <p>Counties in Southeastern United States, sized by population. Crime rate is total arrests per 100,000 people in 2012. <br>
+      Sources: US Census Bureau and UMich National Archive of Criminal Justice Data</p>
   </div>
 </div>
 <div class="controls section">
@@ -119,8 +143,8 @@
     state: 'all'
   };
   var svg, x, y;
-  var margin = { top: 15, right: 15, bottom: 30, left: 45 };
-  var width = 640 - margin.right - margin.left;
+  var margin = { top: 15, right: 15, bottom: 40, left: 80 };
+  var width = 680 - margin.right - margin.left;
   var height = 400 - margin.top - margin.bottom;
   // FETCH DATA
   d3.json('data.json', function (error, json) {
@@ -157,7 +181,9 @@
     
 
     // AXES
-    var padding=0;
+    var padding=0
+    var axispadding=60
+    var xaxispadding=35
     var xAxis = d3.svg.axis()
       .scale(x)
       .orient("bottom")
@@ -177,6 +203,18 @@
       .attr("class","axis")
       .attr("transform","translate("+ padding + ",0)")
       .call(yAxis);
+
+    svg.append("text")
+      .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
+      .attr("class","axislabel")
+      .attr("transform", "translate("+ (-axispadding) +","+(height/2)+")rotate(-90)")  // text is drawn off the screen top left, move down and out and rotate
+      .text("Arrests per 100,000 people");
+
+  svg.append("text")
+      .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
+      .attr("class","axislabel")
+      .attr("transform", "translate("+ (width/2) +","+(height+(xaxispadding))+")")  // centre below axis
+      .text("Poverty Rate (%)");
 
     // EVENT HANDLERS
     d3.select('#year-range').on('change', function () {
