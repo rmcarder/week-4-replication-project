@@ -60,6 +60,20 @@
     #year-range {
       color: "red";
     }
+
+    .axis path,
+    .axis line {
+      fill: none;
+      stroke: #CECECE;
+      shape-rendering: crispEdges;
+                }
+
+    .axis text {
+        font-family: 'Arimo', sans-serif;
+        font-size: 11px;
+        color: #CECECE;
+    }
+    
   </style>
 </head>
 <body>
@@ -115,7 +129,10 @@
     setup();
     update();
   });
-  function setup() {
+  
+
+  function setup() {    
+
     // SVG
     svg = d3.select('#chart')
       .append('svg')
@@ -123,6 +140,7 @@
       .attr('height', height + margin.top + margin.bottom)
       .append('g')
       .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+    
     // SCALES
     x = d3.scale.linear()
       .domain([0, d3.max(data, function (d) { return d.PovertyRate; })])
@@ -132,7 +150,34 @@
       .domain(d3.extent(data, function (d) { return d.rate; }))
       .range([height, 0])
       .nice();
+
+    rscale = d3.scale.linear()
+      .domain([0, d3.max(data, function (d) {return d.Pop; })])
+      .range([2,10]);
+    
+
     // AXES
+    var padding=0;
+    var xAxis = d3.svg.axis()
+      .scale(x)
+      .orient("bottom")
+      .ticks(10);
+
+    var yAxis = d3.svg.axis()
+      .scale(y)
+      .orient("left")
+      .ticks(10);
+    
+    svg.append("g")
+      .attr("class","axis")
+      .attr("transform","translate(0,"+ height + ")")
+      .call(xAxis);
+
+    svg.append("g")
+      .attr("class","axis")
+      .attr("transform","translate("+ padding + ",0)")
+      .call(yAxis);
+
     // EVENT HANDLERS
     d3.select('#year-range').on('change', function () {
       options.state = d3.event.target.value;
@@ -154,12 +199,14 @@
     // SCATTERPLOT
     var points = svg.selectAll('.point')
       .data(txData);
+
     points.enter().append('circle')
-      .attr('class', 'point')
-      .attr('r', 5);
+      .attr('class', 'point');
+
     points
       .attr('cx', function (d) { return x(d.PovertyRate); })
-      .attr('cy', function (d) { return y(d.rate); });
+      .attr('cy', function (d) { return y(d.rate); })
+      .attr('r', function (d) { return rscale(d.Pop); });
     points.exit().remove();
 
   }
