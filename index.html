@@ -43,6 +43,15 @@
     .point.filtered {
       opacity: .07;
     }
+    .point2 {
+      stroke: rgb(255, 0, 94);
+      stroke-width: 1;
+      fill: rgba(255, 0, 94, .5);
+      opacity: .7;
+    }
+    .point2.filtered {
+      opacity: .07;
+    }
     .bar {
       fill: rgb(51, 122, 183);
     }
@@ -103,7 +112,7 @@
 <div class="header section">
   <div class="container">
     <h1>Poverty and Crime - United States</h1>
-    <p>Counties in the United States, sized by population. Crime rate is total arrests per 100,000 people in 2012. <br>
+    <p>Counties in the United States, sized by population, where data is available. Crime rate is total arrests per 100,000 people in 2012. <br>
       Sources: US Census Bureau and UMich National Archive of Criminal Justice Data</p>
   </div>
 </div>
@@ -178,8 +187,11 @@
   </div>
 </div>
 <div class="main section">
-  <div class="container">
+  <div class="col-sm-6">
     <div id="chart"></div>
+  </div>
+  <div class="col-sm-6">
+    <div id="chart2"></div>
   </div>
 </div>
 <script type="text/javascript" src="https://npmcdn.com/d3@3.5.17/d3.min.js"></script>
@@ -191,10 +203,10 @@
     state: 'all',
     region: 'alll',
   };
-  var svg, x, y;
+  var svg, x, y, svg2, x2, y2;
   var margin = { top: 15, right: 15, bottom: 40, left: 80 };
-  var width = 680 - margin.right - margin.left;
-  var height = 400 - margin.top - margin.bottom;
+  var width = 700 - margin.right - margin.left;
+  var height = 500 - margin.top - margin.bottom;
   // FETCH DATA
   d3.json('data.json', function (error, json) {
     if (error) { throw error; }
@@ -206,15 +218,23 @@
 
   function setup() {    
 
-    // SVG
+    // SVG 1
     svg = d3.select('#chart')
       .append('svg')
       .attr('width', width + margin.right + margin.left)
       .attr('height', height + margin.top + margin.bottom)
       .append('g')
       .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+    //SVG 2
+     svg2 = d3.select('#chart2')
+      .append('svg')
+      .attr('width', width + margin.right + margin.left)
+      .attr('height', height + margin.top + margin.bottom)
+      .append('g')
+      .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
     
-    // SCALES
+    // SCALES 1
     x = d3.scale.linear()
       .domain([0, d3.max(data, function (d) { return d.PovertyRate; })])
       .range([0, width])
@@ -227,12 +247,26 @@
     rscale = d3.scale.linear()
       .domain([0, d3.max(data, function (d) {return d.Pop; })])
       .range([2,20]);
-    
+
+     // SCALES 2
+    x2 = d3.scale.linear()
+      .domain([0, d3.max(data, function (d) { return d.MedianIncome; })])
+      .range([0, width])
+      .nice();
+    y2= d3.scale.linear()
+      .domain(d3.extent(data, function (d) { return d.rate; }))
+      .range([height, 0])
+      .nice();
+
+     
 
     // AXES
     var padding=0
     var axispadding=60
     var xaxispadding=35
+
+
+    //Chart 1 Axes
     var xAxis = d3.svg.axis()
       .scale(x)
       .orient("bottom")
@@ -264,6 +298,40 @@
       .attr("class","axislabel")
       .attr("transform", "translate("+ (width/2) +","+(height+(xaxispadding))+")")  // centre below axis
       .text("Poverty Rate (%)");
+
+    //chart2 Axes
+
+    var xAxis2 = d3.svg.axis()
+      .scale(x2)
+      .orient("bottom")
+      .ticks(10);
+
+    var yAxis2 = d3.svg.axis()
+      .scale(y2)
+      .orient("left")
+      .ticks(10);
+    
+    svg2.append("g")
+      .attr("class","axis")
+      .attr("transform","translate(0,"+ height + ")")
+      .call(xAxis2);
+
+    svg2.append("g")
+      .attr("class","axis")
+      .attr("transform","translate("+ padding + ",0)")
+      .call(yAxis2);
+
+    svg2.append("text")
+      .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
+      .attr("class","axislabel")
+      .attr("transform", "translate("+ (-axispadding) +","+(height/2)+")rotate(-90)")  // text is drawn off the screen top left, move down and out and rotate
+      .text("Arrests per 100,000 people");
+
+    svg2.append("text")
+      .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
+      .attr("class","axislabel")
+      .attr("transform", "translate("+ (width/2) +","+(height+(xaxispadding))+")")  // centre below axis
+      .text("Median Income");
 
     // EVENT HANDLERS
     d3.select('#year-range').on('change', function () {
@@ -310,6 +378,19 @@
       .attr('cy', function (d) { return y(d.rate); })
       .attr('r', function (d) { return rscale(d.Pop); });
     points.exit().remove();
+
+    //2nd Scatterplot
+     var points2 = svg2.selectAll('.point2')
+      .data(txData);
+
+    points2.enter().append('circle')
+      .attr('class', 'point2');
+
+    points2
+      .attr('cx', function (d) { return x2(d.MedianIncome); })
+      .attr('cy', function (d) { return y2(d.rate); })
+      .attr('r', function (d) { return rscale(d.Pop); });
+    points2.exit().remove();
 
   }
 
