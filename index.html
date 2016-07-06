@@ -30,10 +30,24 @@
     
     .label {
       font-weight: 700;
-
-    
-
     }
+
+    .axis path,
+    .axis line {
+      fill: none;
+      stroke: #CECECE;
+      shape-rendering: crispEdges;
+    }
+
+    .y.axis path {
+       display: none;
+    }
+
+    .y.axis line {
+      stroke: #CECECE;
+      stroke-dasharray: 2,2;
+    }
+
     .point {
       stroke: rgb(240, 255, 13);
       stroke-width: 1;
@@ -121,7 +135,7 @@
     <div class="btn-toolbar">
       <label for="region-select">Region: </label>
       <select id="region-select">
-        <option value="alll">All</option>
+        <option value="all">All</option>
         <option class="select-dash" disabled="disabled">-Region-</option>
         <option value="Northeast">Northeast</option>
         <option value="Southeast">Southeast</option>
@@ -201,7 +215,7 @@
   var data = [];
   var options = {
     state: 'all',
-    region: 'alll',
+    region: 'all',
   };
   var svg, x, y, svg2, x2, y2;
   var margin = { top: 15, right: 15, bottom: 40, left: 80 };
@@ -244,48 +258,47 @@
       .range([height, 0])
       .nice();
 
-    rscale = d3.scale.linear()
+    rscale = d3.scale.sqrt()
       .domain([0, d3.max(data, function (d) {return d.Pop; })])
-      .range([2,20]);
+      .range([2,10]);
 
      // SCALES 2
     x2 = d3.scale.linear()
       .domain([0, d3.max(data, function (d) { return d.MedianIncome; })])
       .range([0, width])
       .nice();
-    y2= d3.scale.linear()
-      .domain(d3.extent(data, function (d) { return d.rate; }))
-      .range([height, 0])
-      .nice();
-
-     
+       
 
     // AXES
     var padding=0
-    var axispadding=60
+    var axispadding=50
     var xaxispadding=35
 
 
     //Chart 1 Axes
     var xAxis = d3.svg.axis()
+      .tickSize(-height,0)
       .scale(x)
       .orient("bottom")
       .ticks(10);
 
     var yAxis = d3.svg.axis()
-      .scale(y)
       .orient("left")
+      .tickSize(-width)
+      .scale(y)
       .ticks(10);
     
-    svg.append("g")
-      .attr("class","axis")
+    var gx = svg.append("g")
+      .attr("class","y axis")
       .attr("transform","translate(0,"+ height + ")")
-      .call(xAxis);
+      .call(xAxis)
+      ;
 
-    svg.append("g")
-      .attr("class","axis")
+    var gy = svg.append("g")
+      .attr("class","y axis")
       .attr("transform","translate("+ padding + ",0)")
-      .call(yAxis);
+      .call(yAxis)
+      ;
 
     svg.append("text")
       .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
@@ -293,33 +306,36 @@
       .attr("transform", "translate("+ (-axispadding) +","+(height/2)+")rotate(-90)")  // text is drawn off the screen top left, move down and out and rotate
       .text("Arrests per 100,000 people");
 
-  svg.append("text")
+   svg.append("text")
       .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
       .attr("class","axislabel")
       .attr("transform", "translate("+ (width/2) +","+(height+(xaxispadding))+")")  // centre below axis
-      .text("Poverty Rate (%)");
+      .text("Poverty Rate");
 
     //chart2 Axes
 
     var xAxis2 = d3.svg.axis()
       .scale(x2)
+      .tickSize(-height)
       .orient("bottom")
-      .ticks(10);
+      .ticks(10,".0s");
 
     var yAxis2 = d3.svg.axis()
-      .scale(y2)
+      .scale(y)
+      .tickSize(-width)
       .orient("left")
       .ticks(10);
     
     svg2.append("g")
-      .attr("class","axis")
+      .attr("class","y axis")
       .attr("transform","translate(0,"+ height + ")")
       .call(xAxis2);
 
     svg2.append("g")
-      .attr("class","axis")
+      .attr("class","y axis")
       .attr("transform","translate("+ padding + ",0)")
-      .call(yAxis2);
+      .call(yAxis2)
+      ;
 
     svg2.append("text")
       .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
@@ -336,7 +352,7 @@
     // EVENT HANDLERS
     d3.select('#year-range').on('change', function () {
       options.state = d3.event.target.value;
-      options.region = 'alll';
+      options.region = 'all';
       console.log(options);
       update();
     });
@@ -348,19 +364,24 @@
       update();
     });
   }
+
+  function customAxis(g) {
+  g.selectAll("text")
+      .attr("x", 4)
+      .attr("dy", -4);
+}
+
   function update() {
     // TRANSFORM
     txData = data.slice();
     if (options.state !== 'all') {
       var state = options.state;
-      console.log(state);
       txData = txData.filter(function (d) {
         return d.Abbr === state;
       });
     }
-    if (options.region !== 'alll') {
+    if (options.region !== 'all') {
       var region = options.region;
-      console.log(region);
       txData = txData.filter(function (d) {
         return d.Region === region;
       });
@@ -388,7 +409,7 @@
 
     points2
       .attr('cx', function (d) { return x2(d.MedianIncome); })
-      .attr('cy', function (d) { return y2(d.rate); })
+      .attr('cy', function (d) { return y(d.rate); })
       .attr('r', function (d) { return rscale(d.Pop); });
     points2.exit().remove();
 
