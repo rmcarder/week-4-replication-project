@@ -66,9 +66,20 @@
     .point2.filtered {
       opacity: .07;
     }
+
     .bar {
       fill: rgb(51, 122, 183);
     }
+
+    .bar rect {
+      fill: steelblue;
+    }
+
+    .bar text {
+      fill: #fff;
+      font: 10px sans-serif;
+    }
+
     .line {
       stroke: rgb(175, 80, 75);
       stroke-width: 2;
@@ -219,7 +230,7 @@
   };
   var svg, x, y, svg2, x2, y2;
   var margin = { top: 15, right: 15, bottom: 40, left: 80 };
-  var width = 700 - margin.right - margin.left;
+  var width = 500 - margin.right - margin.left;
   var height = 500 - margin.top - margin.bottom;
   // FETCH DATA
   d3.json('data.json', function (error, json) {
@@ -247,10 +258,10 @@
       .attr('height', height + margin.top + margin.bottom)
       .append('g')
       .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-    
+  
     // SCALES 1
     x = d3.scale.linear()
-      .domain([0, d3.max(data, function (d) { return d.PovertyRate; })])
+      .domain([0, d3.max(data, function (d) { return d.PovertyRate/100; })])
       .range([0, width])
       .nice();
     y = d3.scale.linear()
@@ -267,6 +278,8 @@
       .domain([0, d3.max(data, function (d) { return d.MedianIncome; })])
       .range([0, width])
       .nice();
+
+    var binnum = x.ticks().length-1;
        
 
     // AXES
@@ -280,7 +293,7 @@
       .tickSize(-height,0)
       .scale(x)
       .orient("bottom")
-      .ticks(10);
+      .ticks(10,"%");
 
     var yAxis = d3.svg.axis()
       .orient("left")
@@ -318,7 +331,7 @@
       .scale(x2)
       .tickSize(-height)
       .orient("bottom")
-      .ticks(10,".0s");
+      .ticks(10,"$,.0s");
 
     var yAxis2 = d3.svg.axis()
       .scale(y)
@@ -353,14 +366,13 @@
     d3.select('#year-range').on('change', function () {
       options.state = d3.event.target.value;
       options.region = 'all';
-      console.log(options);
+      console.log(xAxis.ticks());
       update();
     });
 
     d3.select('#region-select').on('change', function () {
       options.region = d3.event.target.value;
       options.state = 'all';
-      console.log(options);
       update();
     });
   }
@@ -395,7 +407,7 @@
       .attr('class', 'point');
 
     points
-      .attr('cx', function (d) { return x(d.PovertyRate); })
+      .attr('cx', function (d) { return x(d.PovertyRate/100); })
       .attr('cy', function (d) { return y(d.rate); })
       .attr('r', function (d) { return rscale(d.Pop); });
     points.exit().remove();
@@ -413,10 +425,29 @@
       .attr('r', function (d) { return rscale(d.Pop); });
     points2.exit().remove();
 
-  }
 
 
-    // HISTOGRAMS
+      // HISTOGRAMS
+     var bins = d3.layout.histogram()
+      .bins(x.ticks().length-1)
+      (txData);
+
+    var bar = svg.selectAll('.bar')
+      .data(bins)
+      .enter().append('g')
+      .attr('class', 'bar')
+      .attr("transform", function(d) { return "translate(" + x(d.x) + "," + y(d.y) + ")"; });
+
+    bar.append('rect')
+      .attr('width', x(bins[0].dx))
+      .attr('height', function (d) {return height - y(d.y); });
+    }
+
+  
+    
+    
+   
+
     // REGRESSION LINE
   
 </script>
