@@ -40,12 +40,14 @@
     }
 
     .y.axis path {
-       display: none;
+      stroke: #CECECE;
+      stroke-width: .5;
     }
 
     .y.axis line {
       stroke: #CECECE;
-      stroke-dasharray: 2,2;
+      stroke-width: .5;
+      w
     }
 
     .point {
@@ -68,7 +70,10 @@
     }
 
     .bar {
-      fill: rgb(51, 122, 183);
+      stroke: rgb(240, 255, 13);
+      stroke-width: 1;
+      fill: rgba(240, 255, 13, .5);
+      opacity: .7;
     }
 
     .bar rect {
@@ -76,6 +81,22 @@
     }
 
     .bar text {
+      fill: #fff;
+      font: 10px sans-serif;
+    }
+
+    .ybar {
+      stroke: rgb(240, 255, 13);
+      stroke-width: 1;
+      fill: rgba(240, 255, 13, .5);
+      opacity: .7;
+    }
+
+    .ybar rect {
+      fill: steelblue;
+    }
+
+    .ybar text {
       fill: #fff;
       font: 10px sans-serif;
     }
@@ -261,10 +282,10 @@
   
     // SCALES 1
     x = d3.scale.linear()
-      .domain([0, d3.max(data, function (d) { return d.PovertyRate/100; })])
+      .domain([0, d3.max(data, function (d) { return d.PovertyRate; })])
       .range([0, width])
       .nice();
-    y = d3.scale.linear()
+    y = d3.scale.log()
       .domain(d3.extent(data, function (d) { return d.rate; }))
       .range([height, 0])
       .nice();
@@ -398,7 +419,67 @@
         return d.Region === region;
       });
     }
-    
+
+
+        // HISTOGRAM X
+     var hist = d3.layout.histogram()
+      .bins(x.ticks())
+      .value(function (d) {return d.PovertyRate;})
+      (txData);
+
+
+    var hy = d3.scale.linear()
+      .domain([0, d3.max(hist, function (d) { return d.length; })])
+      .range([0, height/5]);
+
+    var bar = svg.selectAll('.bar')
+      .data(hist)
+
+    var barWidth = x(hist[0].dx)+1;
+
+    bar
+      .enter().append('rect')
+      .attr('class', 'bar')
+      .attr('width', barWidth )
+      .attr('x', function (d) {return x(d.x);})
+
+    bar
+      .transition().duration(1000).delay(150)
+      .attr('height', function (d) {return hy(d.length);})  //y scale
+      .attr('y', function (d) {return height - hy(d.length);});
+
+        // HISTOGRAM Y
+     var yhist = d3.layout.histogram()
+      .bins(y.ticks())
+      .value(function (d) {return d.rate;})
+      (txData);   
+
+     var hx = d3.scale.linear()
+      .domain([0, d3.max(yhist, function (d) { return d.length; })])
+      .range([0, height/5]);
+
+
+    var ybar = svg.selectAll('.ybar')
+      .data(yhist)
+
+
+    var ybarWidth = x(yhist[0].dx)+1;
+
+    ybar
+      .enter().append('rect')
+      .attr('class', 'ybar')
+      .attr("transform", "translate("+0+","+(height/2)+")rotate(-270)") 
+      .attr('width', ybarWidth )
+      .attr('x', function (d) {return x(d.x);});
+     
+
+    ybar
+      .transition().duration(1000).delay(150)
+      .attr('height', function (d) {return hx(d.length);})  //y scale
+      .attr('y', function (d) {return height - hx(d.length);});
+
+     
+
     // SCATTERPLOT
     var points = svg.selectAll('.point')
       .data(txData);
@@ -407,7 +488,7 @@
       .attr('class', 'point');
 
     points
-      .attr('cx', function (d) { return x(d.PovertyRate/100); })
+      .attr('cx', function (d) { return x(d.PovertyRate); })
       .attr('cy', function (d) { return y(d.rate); })
       .attr('r', function (d) { return rscale(d.Pop); });
     points.exit().remove();
@@ -427,20 +508,7 @@
 
 
 
-      // HISTOGRAMS
-     var bins = d3.layout.histogram()
-      .bins(x.ticks().length-1)
-      (txData);
-
-    var bar = svg.selectAll('.bar')
-      .data(bins)
-      .enter().append('g')
-      .attr('class', 'bar')
-      .attr("transform", function(d) { return "translate(" + x(d.x) + "," + y(d.y) + ")"; });
-
-    bar.append('rect')
-      .attr('width', x(bins[0].dx))
-      .attr('height', function (d) {return height - y(d.y); });
+   
     }
 
   
