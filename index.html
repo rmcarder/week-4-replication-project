@@ -285,7 +285,7 @@
       .domain([0, d3.max(data, function (d) { return d.PovertyRate/100; })])
       .range([0, width])
       .nice();
-    y = d3.scale.linear()
+    y = d3.scale.log()
       .domain(d3.extent(data, function (d) { return d.rate; }))
       .range([height, 0])
       .nice();
@@ -471,13 +471,14 @@
 
     //this is coming out way too big. dx for yhist is 2000, which is the correct value. The way I understand this syntax is that its converting that 2000 to a pixel value to fit along my earlier defined y scale.  This is the way it seemed to work for the x axis histogram, and also in calculating the position of each bar 
 
-    //Hacked this by dividing by 12 (. I'm still unsure why without the /12 it didnt come out to the right height
+    //Hacked this by dividing by 12. I'm still unsure why without the /12 it didnt come out to the right height.
     var ybarHeight = y(yhist[1].x-yhist[0].x)/(y.ticks().length-1)+1.8;
 
     console.log(ybarHeight);
 
 
-    //Positioning seems to be almost there, except its offset  
+    //Positioning seems to be almost there, except its offset by one bar's length
+    //Update: Hacked this too by subtracting one bar height. 
     ybar
       .enter().append('rect')
       .attr('class', 'ybar')
