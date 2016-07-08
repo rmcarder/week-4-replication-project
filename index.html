@@ -282,10 +282,10 @@
   
     // SCALES 1
     x = d3.scale.linear()
-      .domain([0, d3.max(data, function (d) { return d.PovertyRate; })])
+      .domain([0, d3.max(data, function (d) { return d.PovertyRate/100; })])
       .range([0, width])
       .nice();
-    y = d3.scale.log()
+    y = d3.scale.linear()
       .domain(d3.extent(data, function (d) { return d.rate; }))
       .range([height, 0])
       .nice();
@@ -424,7 +424,7 @@
         // HISTOGRAM X
      var hist = d3.layout.histogram()
       .bins(x.ticks())
-      .value(function (d) {return d.PovertyRate;})
+      .value(function (d) {return d.PovertyRate/100;})
       (txData);
 
 
@@ -436,6 +436,8 @@
       .data(hist)
 
     var barWidth = x(hist[0].dx)+1;
+    console.log(hist[0].dx);
+    console.log(barWidth);
 
     bar
       .enter().append('rect')
@@ -454,6 +456,9 @@
       .value(function (d) {return d.rate;})
       (txData);   
 
+      console.log(yhist);
+
+      //horizontal histogram scale
      var hx = d3.scale.linear()
       .domain([0, d3.max(yhist, function (d) { return d.length; })])
       .range([0, height/5]);
@@ -462,22 +467,29 @@
     var ybar = svg.selectAll('.ybar')
       .data(yhist)
 
+      console.log(yhist[0].dx);
 
-    var ybarWidth = x(yhist[0].dx)+1;
+    //this is coming out way too big. dx for yhist is 2000, which is the correct value. The way I understand this syntax is that its converting that 2000 to a pixel value to fit along my earlier defined y scale.  
+    var ybarHeight = y(yhist[0].dx)+1;
 
+    console.log(ybarHeight);
+
+
+    //Positioning seems to be almost there, except its offset  
     ybar
       .enter().append('rect')
       .attr('class', 'ybar')
-      .attr("transform", "translate("+0+","+(height/2)+")rotate(-270)") 
-      .attr('width', ybarWidth )
-      .attr('x', function (d) {return x(d.x);});
+      .attr('height', ybarHeight )
+      .attr('y', function (d) {return y(d.x);});
      
 
     ybar
       .transition().duration(1000).delay(150)
-      .attr('height', function (d) {return hx(d.length);})  //y scale
-      .attr('y', function (d) {return height - hx(d.length);});
+      .attr('width', function (d) {return hx(d.length);})  //y scale
+      .attr('x', 0);
 
+
+    //No second histogram yet. Will work on converting to the constructor pattern.
      
 
     // SCATTERPLOT
@@ -488,7 +500,7 @@
       .attr('class', 'point');
 
     points
-      .attr('cx', function (d) { return x(d.PovertyRate); })
+      .attr('cx', function (d) { return x(d.PovertyRate/100); })
       .attr('cy', function (d) { return y(d.rate); })
       .attr('r', function (d) { return rscale(d.Pop); });
     points.exit().remove();
