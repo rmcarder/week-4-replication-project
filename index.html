@@ -430,7 +430,7 @@
 
     var hy = d3.scale.linear()
       .domain([0, d3.max(hist, function (d) { return d.length; })])
-      .range([0, height/5]);
+      .range([0, height/8]);
 
     var bar = svg.selectAll('.bar')
       .data(hist)
@@ -461,7 +461,7 @@
       //horizontal histogram scale
      var hx = d3.scale.linear()
       .domain([0, d3.max(yhist, function (d) { return d.length; })])
-      .range([0, height/5]);
+      .range([0, height/8]);
 
 
     var ybar = svg.selectAll('.ybar')
@@ -469,8 +469,10 @@
 
       console.log(yhist[0].dx);
 
-    //this is coming out way too big. dx for yhist is 2000, which is the correct value. The way I understand this syntax is that its converting that 2000 to a pixel value to fit along my earlier defined y scale.  
-    var ybarHeight = y(yhist[0].dx)+1;
+    //this is coming out way too big. dx for yhist is 2000, which is the correct value. The way I understand this syntax is that its converting that 2000 to a pixel value to fit along my earlier defined y scale.  This is the way it seemed to work for the x axis histogram, and also in calculating the position of each bar 
+
+    //Hacked this by dividing by 12 (. I'm still unsure why without the /12 it didnt come out to the right height
+    var ybarHeight = y(yhist[1].x-yhist[0].x)/(y.ticks().length-1)+1.8;
 
     console.log(ybarHeight);
 
@@ -480,7 +482,7 @@
       .enter().append('rect')
       .attr('class', 'ybar')
       .attr('height', ybarHeight )
-      .attr('y', function (d) {return y(d.x);});
+      .attr('y', function (d) {return y(d.x)-ybarHeight;});
      
 
     ybar
