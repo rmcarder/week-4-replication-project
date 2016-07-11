@@ -499,7 +499,9 @@
     points.enter().append('circle')
       .attr('class', 'point');
 
+
     points
+    .transition().duration(1000).delay(150)
       .attr('cx', function (d) { return x(d.PovertyRate/100); })
       .attr('cy', function (d) { return y(d.rate); })
       .attr('r', function (d) { return rscale(d.Pop); });
@@ -513,6 +515,7 @@
       .attr('class', 'point2');
 
     points2
+    .transition().duration(1000).delay(150)
       .attr('cx', function (d) { return x2(d.MedianIncome); })
       .attr('cy', function (d) { return y(d.rate); })
       .attr('r', function (d) { return rscale(d.Pop); });
