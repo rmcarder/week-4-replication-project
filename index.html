@@ -84,6 +84,16 @@
         font-size: 11px;
         fill: #CECECE;
       }
+     .tooltip {
+       padding: .5em 1em;
+       background: rgba(0,0,0,.75);
+       color: white;
+       font-size: 13px;
+       font-family: 'Arimo', sans-serif;
+       font-weight: 500;
+       line-height: 1;
+       border-radius: 8px;
+     }
 
     label {
       font-weight: 2px;
@@ -122,14 +132,7 @@
         font-weight: 2px;
       color: #FFFFFF;
     }
-    .tooltip {
-       padding: .5em 1em;
-       background: rgba(0,0,0,.75);
-       color: white;
-       font-size: 13px;
-       font-weight: 700;
-       line-height: 1;
-     }
+   
 
     
   </style>
@@ -293,7 +296,7 @@
 
     rscale = d3.scale.sqrt()
       .domain([0, d3.max(data, function (d) {return d.Pop; })])
-      .range([2,10]);
+      .range([1,15]);
      
 
     // AXES
@@ -349,7 +352,7 @@
      chart.pointTooltip = d3.tip()
        .attr('class', 'tooltip')
        .offset([-6, 0])
-       .html(function(d) { return 'County: '+ d.County +'<br>' + 'State: ' + d.Abbr; });
+       .html(function(d) { return 'County: '+ d.County +'<br>' + 'State: ' + d.Abbr + '<br>'+'Crime Rate: ' + d.rate; });
 
      chart.pointTooltip(chart.svg);
  
