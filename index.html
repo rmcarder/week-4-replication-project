@@ -52,10 +52,10 @@
     }
 
     .bar {
-      stroke: rgb(240, 255, 13);
+      stroke: rgb(240, 59, 32);
       stroke-width: 1;
-      fill: rgba(240, 255, 13, .5);
-      opacity: .7;
+      fill: rgb(240, 59, 32);
+      opacity: 1;
     }
 
     .bar rect {
@@ -68,11 +68,10 @@
     }
 
     .ybar {
-      stroke: rgb(240, 255, 13);
+      stroke: rgb(240, 59, 32);
       stroke-width: 1;
-      fill: rgba(240, 255, 13, .5);
-      opacity: .7;
-    }
+      fill: rgb(240, 59, 32);
+      opacity: 1;    }
 
     .ybar text {
       fill: #fff;
@@ -238,18 +237,16 @@
   var width = 550 - margin.right - margin.left;
   var height = 350 - margin.top - margin.bottom;
   var barMax = 8;
-  var barSpace = 
- 
-
-  // FETCH DATA
+  
+ // FETCH DATA
   d3.json('data.json', function (error, json) {
     if (error) { throw error; }    
     
     data = json;
 
     var charts = [
-       new Chart('#chart1', 'PovertyRate', 'Poverty Rate (%)', 'rate','Arrests Per 100,000 People', '.f', ',0s', 'point'),
-       new Chart('#chart2', 'MedianIncome', 'Median Income', 'rate', 'Arrests Per 100,000 People', '.0s', ',0s','point2')
+       new Chart('#chart1', 'PovertyRate', 'Poverty Rate (%)', 'rate','Arrests Per 100,000 People', '.f', ',0s', '.point'),
+       new Chart('#chart2', 'MedianIncome', 'Median Income', 'rate', 'Arrests Per 100,000 People', '.0s', ',0s','.point2')
      ];
 
 
@@ -395,7 +392,7 @@
     //Hacked this by dividing by 12. I'm still unsure why without the /12 it didnt come out to the right height.
     var ybarHeight = chart.y(yhist[1].x-yhist[0].x)/(chart.y.ticks().length-1)+1.8;
 
-
+    var ybarSpace = ybarHeight/4;
     //Positioning seems to be almost there, except its offset by one bar's length
     //Update: Hacked this too by subtracting one bar height. 
     
@@ -403,8 +400,8 @@
     ybar
       .enter().append('rect')
       .attr('class', 'ybar')
-      .attr('height', ybarHeight)
-      .attr('y', function (d) {return chart.y(d.x)-ybarHeight;});
+      .attr('height', ybarHeight-(1/2)*ybarHeight)
+      .attr('y', function (d) {return (chart.y(d.x)-ybarHeight) + ybarSpace;})
      
 
     ybar
@@ -413,13 +410,13 @@
       .attr('x', 0);
 
 
-        // HISTOGRAM X
-     var hist = d3.layout.histogram()
+   // HISTOGRAM X
+    var hist = d3.layout.histogram()
       .bins(chart.x.ticks())
       .value(function (d) {return d[chart.xvariable];})
       (txData);
 
-     var hy = d3.scale.linear()
+    var hy = d3.scale.linear()
       .domain([0, d3.max(hist, function (d) { return d.length; })])
       .range([0, height/barMax]);
 
@@ -427,13 +424,14 @@
       .data(hist)
 
     var barWidth = chart.x(hist[0].dx)+1;
+    var xbarSpace = barWidth/4;
    
 
     bar
       .enter().append('rect')
       .attr('class', 'bar')
-      .attr('width', barWidth)
-      .attr('x', function (d) {return chart.x(d.x);})
+      .attr('width', barWidth-(1/2)*barWidth)
+      .attr('x', function (d) {return (chart.x(d.x))+ xbarSpace;})
 
     bar
       .transition().duration(1000).delay(150)
@@ -449,7 +447,7 @@
       .data(txData);
 
     points.enter().append('circle')
-      .attr('class', function (d) {return d[chart.pointClass];})
+      .attr('class', 'point');
 
 
     points
