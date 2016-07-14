@@ -32,8 +32,6 @@
       font-weight: 700;
     }
 
- 
-
     .point {
       stroke: rgb(240, 255, 13);
       stroke-width: 1;
@@ -74,10 +72,6 @@
       stroke-width: 1;
       fill: rgba(240, 255, 13, .5);
       opacity: .7;
-    }
-
-    .ybar rect {
-      fill: steelblue;
     }
 
     .ybar text {
@@ -138,8 +132,6 @@
        line-height: 1;
      }
 
-
-    
     
   </style>
 </head>
@@ -246,6 +238,7 @@
   var width = 550 - margin.right - margin.left;
   var height = 350 - margin.top - margin.bottom;
   var barMax = 8;
+  var barSpace = 
  
 
   // FETCH DATA
@@ -255,8 +248,8 @@
     data = json;
 
     var charts = [
-       new Chart('#chart1', 'PovertyRate', 'Poverty Rate (%)', 'rate','Arrests Per 100,000 People'),
-       new Chart('#chart2', 'MedianIncome', 'Median Income', 'rate', 'Arrests Per 100,000 People')
+       new Chart('#chart1', 'PovertyRate', 'Poverty Rate (%)', 'rate','Arrests Per 100,000 People', '.f', ',0s', 'point'),
+       new Chart('#chart2', 'MedianIncome', 'Median Income', 'rate', 'Arrests Per 100,000 People', '.0s', ',0s','point2')
      ];
 
 
@@ -276,7 +269,7 @@
  });
   
 
-  function Chart(selector, xvariable, xtitle, yvariable, ytitle) {    
+  function Chart(selector, xvariable, xtitle, yvariable, ytitle, xAxisFormat, yAxisFormat, pointClass) {    
     var chart = this;
 
     chart.xvariable = xvariable;
@@ -317,13 +310,13 @@
       .tickSize(-height,0)
       .scale(chart.x)
       .orient("bottom")
-      .ticks(10,"%");
+      .ticks(10, xAxisFormat);
 
     var yAxis = d3.svg.axis()
       .orient("left")
       .tickSize(-width)
       .scale(chart.y)
-      .ticks(10);
+      .ticks(10, yAxisFormat);
     
     var gx = chart.svg.append("g")
       .attr("class","y axis")
@@ -385,9 +378,6 @@
       .bins(chart.y.ticks())
       .value(function (d) {return d[chart.yvariable];})
       (txData);  
-
-      console.log(yhist) ;
-
     
 
       //Y Histogram's "Height" scale which is actually horizontal
@@ -429,10 +419,7 @@
       .value(function (d) {return d[chart.xvariable];})
       (txData);
 
-      console.log(hist);
-
-
-    var hy = d3.scale.linear()
+     var hy = d3.scale.linear()
       .domain([0, d3.max(hist, function (d) { return d.length; })])
       .range([0, height/barMax]);
 
@@ -462,7 +449,7 @@
       .data(txData);
 
     points.enter().append('circle')
-      .attr('class', 'point');
+      .attr('class', function (d) {return d[chart.pointClass];})
 
 
     points
