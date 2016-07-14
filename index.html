@@ -32,23 +32,7 @@
       font-weight: 700;
     }
 
-    .axis path,
-    .axis line {
-      fill: none;
-      stroke: #CECECE;
-      shape-rendering: crispEdges;
-    }
-
-    .y.axis path {
-      stroke: #CECECE;
-      stroke-width: .5;
-    }
-
-    .y.axis line {
-      stroke: #CECECE;
-      stroke-width: .5;
-      w
-    }
+ 
 
     .point {
       stroke: rgb(240, 255, 13);
@@ -101,10 +85,7 @@
       font: 10px sans-serif;
     }
 
-    .line {
-      stroke: rgb(175, 80, 75);
-      stroke-width: 2;
-    }
+   
     .axis text {
         font-family: 'Arimo', sans-serif;
         font-size: 11px;
@@ -148,6 +129,14 @@
         font-weight: 2px;
       color: #FFFFFF;
     }
+    .tooltip {
+       padding: .5em 1em;
+       background: rgba(0,0,0,.75);
+       color: white;
+       font-size: 13px;
+       font-weight: 700;
+       line-height: 1;
+     }
 
 
     
@@ -232,53 +221,83 @@
     </div>
   </div>
 </div>
-<div class="main section">
-  <div class="container">
-    <div id="chart"></div>
-  </div>
-  
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-6">
+            <div id="chart1"></div>
+        </div>
+        <div class="col-lg-6">
+            <div id="chart2"></div>
+        </div>
+    </div>
+</div>  
 </div>
 <script type="text/javascript" src="https://npmcdn.com/d3@3.5.17/d3.min.js"></script>
 <script type="text/javascript" src="https://npmcdn.com/science@1.9.3/science.v1.min.js"></script>
 <script type="text/javascript" src="https://npmcdn.com/simple-statistics@2.0.0/dist/simple-statistics.min.js"></script>
+<script type="text/javascript" src="https://npmcdn.com/d3-tip@0.6.7/index.js"></script>
 <script>
   var data = [];
   var options = {
     state: 'all',
     region: 'all',
   };
-  var svg, x, y, svg2, x2, y2;
   var margin = { top: 15, right: 15, bottom: 40, left: 80 };
-  var width = 900 - margin.right - margin.left;
-  var height = 500 - margin.top - margin.bottom;
+  var width = 550 - margin.right - margin.left;
+  var height = 350 - margin.top - margin.bottom;
+  var barMax = 8;
  
 
   // FETCH DATA
   d3.json('data.json', function (error, json) {
-    if (error) { throw error; }
+    if (error) { throw error; }    
+    
     data = json;
-    setup();
-    update();
-  });
+
+    var charts = [
+       new Chart('#chart1', 'PovertyRate', 'Poverty Rate (%)', 'rate','Arrests Per 100,000 People'),
+       new Chart('#chart2', 'MedianIncome', 'Median Income', 'rate', 'Arrests Per 100,000 People')
+     ];
+
+
+    // EVENT HANDLERS
+    d3.select('#year-range').on('change', function () {
+      options.state = d3.event.target.value;
+      options.region = 'all';
+      charts.forEach(function (chart) { chart.update();});
+    });
+
+    d3.select('#region-select').on('change', function () {
+      options.region = d3.event.target.value;
+      options.state = 'all';
+      charts.forEach(function (chart) { chart.update();});
+    });
+
+ });
   
 
-  function setup() {    
+  function Chart(selector, xvariable, xtitle, yvariable, ytitle) {    
+    var chart = this;
 
-    // SVG 1
-    svg = d3.select('#chart')
+    chart.xvariable = xvariable;
+    chart.yvariable = yvariable;
+
+    // SVG
+    chart.svg = d3.select(selector)
       .append('svg')
       .attr('width', width + margin.right + margin.left)
       .attr('height', height + margin.top + margin.bottom)
       .append('g')
       .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
   
-    // SCALES 1
-    x = d3.scale.linear()
-      .domain([0, d3.max(data, function (d) { return d.PovertyRate/100; })])
+    // SCALES 
+    chart.x = d3.scale.linear()
+      .domain([0, d3.max(data, function (d) { return d[xvariable]; })])
       .range([0, width])
       .nice();
-    y = d3.scale.log()
-      .domain(d3.extent(data, function (d) { return d.rate; }))
+
+    chart.y = d3.scale.linear()
+      .domain(d3.extent(data, function (d) { return d[yvariable]; }))
       .range([height, 0])
       .nice();
 
@@ -296,65 +315,58 @@
     // Axes
     var xAxis = d3.svg.axis()
       .tickSize(-height,0)
-      .scale(x)
+      .scale(chart.x)
       .orient("bottom")
       .ticks(10,"%");
 
     var yAxis = d3.svg.axis()
       .orient("left")
       .tickSize(-width)
-      .scale(y)
+      .scale(chart.y)
       .ticks(10);
     
-    var gx = svg.append("g")
+    var gx = chart.svg.append("g")
       .attr("class","y axis")
       .attr("transform","translate(0,"+ height + ")")
       .call(xAxis)
       ;
 
-    var gy = svg.append("g")
+    var gy = chart.svg.append("g")
       .attr("class","y axis")
       .attr("transform","translate("+ padding + ",0)")
       .call(yAxis)
       ;
 
-    svg.append("text")
+    chart.svg.append("text")
       .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
       .attr("class","axislabel")
       .attr("transform", "translate("+ (-axispadding) +","+(height/2)+")rotate(-90)")  // text is drawn off the screen top left, move down and out and rotate
-      .text("Arrests per 100,000 people");
+      .text(ytitle);
 
-   svg.append("text")
+   chart.svg.append("text")
       .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
       .attr("class","axislabel")
       .attr("transform", "translate("+ (width/2) +","+(height+(xaxispadding))+")")  // centre below axis
-      .text("Poverty Rate");
-  
+      .text(xtitle);
 
-    // EVENT HANDLERS
-    d3.select('#year-range').on('change', function () {
-      options.state = d3.event.target.value;
-      options.region = 'all';
-      console.log(xAxis.ticks());
-      update();
-    });
+    chart.tooltip = d3.tip()
+       .attr('class', 'tooltip')
+       .offset([-6, 0])
+       .html(function(d) { return d.length + ' counties'; });
 
-    d3.select('#region-select').on('change', function () {
-      options.region = d3.event.target.value;
-      options.state = 'all';
-      update();
-    });
+     chart.tooltip(chart.svg);
+ 
+     chart.update();
   }
 
-  function customAxis(g) {
-  g.selectAll("text")
-      .attr("x", 4)
-      .attr("dy", -4);
-}
 
-  function update() {
-    // TRANSFORM
+
+
+  Chart.prototype.update = function() {
+   var chart = this;
+
     txData = data.slice();
+    //Options
     if (options.state !== 'all') {
       var state = options.state;
       txData = txData.filter(function (d) {
@@ -370,35 +382,39 @@
 
  // HISTOGRAM Y
      var yhist = d3.layout.histogram()
-      .bins(y.ticks())
-      .value(function (d) {return d.rate;})
-      (txData);   
+      .bins(chart.y.ticks())
+      .value(function (d) {return d[chart.yvariable];})
+      (txData);  
+
+      console.log(yhist) ;
 
     
 
-      //horizontal histogram scale? Feel like I'm overcomplicating the scales
+      //Y Histogram's "Height" scale which is actually horizontal
      var hx = d3.scale.linear()
       .domain([0, d3.max(yhist, function (d) { return d.length; })])
-      .range([0, height/8]);
+      .range([0, height/barMax]);
 
 
-    var ybar = svg.selectAll('.ybar')
+    var ybar = chart.svg.selectAll('.ybar')
       .data(yhist)
 
 
     //this is coming out way too big. dx for yhist is 2000, which is the correct value. The way I understand this syntax is that its converting that 2000 to a pixel value to fit along my earlier defined y scale.  This is the way it seemed to work for the x axis histogram, and also in calculating the position of each bar 
 
     //Hacked this by dividing by 12. I'm still unsure why without the /12 it didnt come out to the right height.
-    var ybarHeight = y(yhist[1].x-yhist[0].x)/(y.ticks().length-1)+1.8;
+    var ybarHeight = chart.y(yhist[1].x-yhist[0].x)/(chart.y.ticks().length-1)+1.8;
 
 
     //Positioning seems to be almost there, except its offset by one bar's length
     //Update: Hacked this too by subtracting one bar height. 
+    
+    //ENTER
     ybar
       .enter().append('rect')
       .attr('class', 'ybar')
-      .attr('height', ybarHeight-(2/3)*ybarHeight)
-      .attr('y', function (d) {return y(d.x)-ybarHeight;});
+      .attr('height', ybarHeight)
+      .attr('y', function (d) {return chart.y(d.x)-ybarHeight;});
      
 
     ybar
@@ -409,26 +425,28 @@
 
         // HISTOGRAM X
      var hist = d3.layout.histogram()
-      .bins(x.ticks())
-      .value(function (d) {return d.PovertyRate/100;})
+      .bins(chart.x.ticks())
+      .value(function (d) {return d[chart.xvariable];})
       (txData);
+
+      console.log(hist);
 
 
     var hy = d3.scale.linear()
       .domain([0, d3.max(hist, function (d) { return d.length; })])
-      .range([0, height/8]);
+      .range([0, height/barMax]);
 
-    var bar = svg.selectAll('.bar')
+    var bar = chart.svg.selectAll('.bar')
       .data(hist)
 
-    var barWidth = x(hist[0].dx)+1;
+    var barWidth = chart.x(hist[0].dx)+1;
    
 
     bar
       .enter().append('rect')
       .attr('class', 'bar')
-      .attr('width', ybarHeight)
-      .attr('x', function (d) {return x(d.x);})
+      .attr('width', barWidth)
+      .attr('x', function (d) {return chart.x(d.x);})
 
     bar
       .transition().duration(1000).delay(150)
@@ -440,7 +458,7 @@
      
 
     // SCATTERPLOT
-    var points = svg.selectAll('.point')
+    var points = chart.svg.selectAll('.point')
       .data(txData);
 
     points.enter().append('circle')
@@ -449,8 +467,8 @@
 
     points
     .transition().duration(1000).delay(150)
-      .attr('cx', function (d) { return x(d.PovertyRate/100); })
-      .attr('cy', function (d) { return y(d.rate); })
+      .attr('cx', function (d) { return chart.x(d[chart.xvariable]); })
+      .attr('cy', function (d) { return chart.y(d[chart.yvariable]); })
       .attr('r', function (d) { return rscale(d.Pop); });
     points.exit().remove();
 
