@@ -339,12 +339,19 @@
       .attr("transform", "translate("+ (width/2) +","+(height+(xaxispadding))+")")  // centre below axis
       .text(xtitle);
 
-    chart.tooltip = d3.tip()
+    chart.barTooltip = d3.tip()
        .attr('class', 'tooltip')
        .offset([-6, 0])
        .html(function(d) { return d.length + ' counties'; });
 
-     chart.tooltip(chart.svg);
+     chart.barTooltip(chart.svg);
+
+     chart.pointTooltip = d3.tip()
+       .attr('class', 'tooltip')
+       .offset([-6, 0])
+       .html(function(d) { return 'County: '+ d.County +'<br>' + 'State: ' + d.Abbr; });
+
+     chart.pointTooltip(chart.svg);
  
      chart.update();
   }
@@ -402,6 +409,8 @@
       .attr('class', 'ybar')
       .attr('height', ybarHeight-(1/2)*ybarHeight)
       .attr('y', function (d) {return (chart.y(d.x)-ybarHeight) + ybarSpace;})
+      .on('mouseover', chart.barTooltip.show)
+      .on('mouseout', chart.barTooltip.hide);
      
 
     ybar
@@ -432,6 +441,8 @@
       .attr('class', 'bar')
       .attr('width', barWidth-(1/2)*barWidth)
       .attr('x', function (d) {return (chart.x(d.x))+ xbarSpace;})
+      .on('mouseover', chart.barTooltip.show)
+      .on('mouseout', chart.barTooltip.hide);
 
     bar
       .transition().duration(1000).delay(150)
@@ -447,7 +458,9 @@
       .data(txData);
 
     points.enter().append('circle')
-      .attr('class', 'point');
+      .attr('class', 'point')
+       .on('mouseover', chart.pointTooltip.show)
+       .on('mouseout', chart.pointTooltip.hide);
 
 
     points
