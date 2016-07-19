@@ -42,21 +42,31 @@
       opacity: .07;
     }
     .point2 {
-      stroke: rgb(255, 0, 94);
+      stroke: rgb(255, 0, 138);
       stroke-width: 0;
-      fill: rgba(255, 0, 94, .5);
+      fill: rgba(255, 0, 138, .5);
       opacity: .7;
     }
     .point2.filtered {
       opacity: .07;
     }
     .point3 {
-      stroke: rgb(255, 0, 94);
+      stroke: rgb(74, 247, 255);
       stroke-width: 0;
-      fill: rgba(255, 0, 94, .5);
+      fill: rgba(74, 247, 255, .5);
       opacity: .7;
     }
     .point3.filtered {
+      opacity: .07;
+    }
+
+      .point4 {
+      stroke: rgb(90, 255, 13);
+      stroke-width: 0;
+      fill: rgba(90, 255, 13, .5);
+      opacity: .7;
+    }
+    .point4.filtered {
       opacity: .07;
     }
 
@@ -261,9 +271,9 @@
 
     var charts = [
        new Chart('#chart1', 'POV', 'Poverty Rate (%)', 'PCT_LACCESS_POP10','Low Access to Store (%)', '.f', ',0s', 'point'),
-       new Chart('#chart2', 'POV17', 'Child Poverty Rate (%)', 'PCT_LACCESS_CHILD10', 'Low Access to Store (% of Children)', '.0s', ',0s','point'),
-       new Chart('#chart3', 'POV', 'Poverty Rate (%)', 'GROCPTH12', 'Grocery Stores per 1000 People', '.0s', ',0s','point'),
-       new Chart('#chart4', 'POV17', 'Child Poverty Rate (%)', 'GROCPTH12', 'Grocery Stores per 1000 People', '.0s', ',0s','point3')
+       new Chart('#chart2', 'POV17', 'Child Poverty Rate (%)', 'PCT_LACCESS_CHILD10', 'Low Access to Store (% of Children)', '.0s', ',0s','point2'),
+       new Chart('#chart3', 'POV', 'Poverty Rate (%)', 'GROCPTH12', 'Grocery Stores per 1000 People', '.0s', ',0s','point3'),
+       new Chart('#chart4', 'POV17', 'Child Poverty Rate (%)', 'GROCPTH12', 'Grocery Stores per 1000 People', '.0s', ',0s','point4')
      ];
 
 
@@ -310,7 +320,7 @@
 
     rscale = d3.scale.sqrt()
       .domain([0, d3.max(data, function (d) {return d.POPEST2012; })])
-      .range([1,15]);
+      .range([1,20]);
      
 
     // AXES
@@ -471,7 +481,7 @@
      
 
     // SCATTERPLOT
-    var points = chart.svg.selectAll('.point')
+    var points = chart.svg.selectAll('.point, .point2, .point3, .point4')
       .data(txData);
 
     points.enter().append('circle')
